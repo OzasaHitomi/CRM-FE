@@ -45,7 +45,12 @@ const mockCustomers: GetCustomersResponseItem[] = [
   },
 ]
 
-const mockPaginationData: PaginationResponseItem = { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 }
+const mockPaginationData: PaginationResponseItem = {
+  page: 1,
+  pageSize: 10,
+  totalCount: 1,
+  totalPages: 1,
+}
 
 const mockMe: MeResponse = { userId: 'user-1', role: 'sales', name: 'Emily Chen' }
 const mockCustomerForm: CustomerForm = {
@@ -128,7 +133,12 @@ describe('CustomersPresentational', () => {
   })
 
   it('Paginationへ正しいpropsが渡されること', () => {
-    const pagination: PaginationResponseItem = { page: 2, pageSize: 10, totalCount: 15, totalPages: 2 }
+    const pagination: PaginationResponseItem = {
+      page: 2,
+      pageSize: 10,
+      totalCount: 15,
+      totalPages: 2,
+    }
     renderPresentational({ pagination })
 
     expect(mockPagination).toHaveBeenCalledWith(

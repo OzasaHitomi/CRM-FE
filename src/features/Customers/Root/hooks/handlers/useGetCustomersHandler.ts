@@ -4,7 +4,12 @@ import { useGetCustomersQuery } from '@/features/Customers/Root/hooks/queries/us
 import type { PaginationResponseItem } from '@/services/internal/backend/v1/types/response/customer'
 
 // データ取得前(ローディング中)に一瞬だけ使う仮のページ情報
-const DEFAULT_PAGINATION: PaginationResponseItem = { page: 1, pageSize: 10, totalCount: 0, totalPages: 0 }
+const DEFAULT_PAGINATION: PaginationResponseItem = {
+  page: 1,
+  pageSize: 10,
+  totalCount: 0,
+  totalPages: 0,
+}
 
 export const useGetCustomersHandler = () => {
   // 今何ページ目を見ているかを覚えておく状態

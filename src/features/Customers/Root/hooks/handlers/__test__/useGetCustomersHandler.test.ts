@@ -13,7 +13,11 @@ vi.mock('@/features/Customers/Root/hooks/queries/useGetCustomersQuery', () => ({
 
 const mockUseGetCustomersQuery = vi.mocked(useGetCustomersQuery)
 
-const setup = (overrides: { data?: GetCustomersResponse; isLoading?: boolean; isError?: boolean }) => {
+const setup = (overrides: {
+  data?: GetCustomersResponse
+  isLoading?: boolean
+  isError?: boolean
+}) => {
   mockUseGetCustomersQuery.mockReturnValue({
     data: undefined,
     isLoading: false,
@@ -53,7 +57,12 @@ describe('useGetCustomersHandler', () => {
     const { result } = customRenderHook(() => useGetCustomersHandler())
 
     expect(result.current.data.customers).toEqual([])
-    expect(result.current.data.pagination).toEqual({ page: 1, pageSize: 10, totalCount: 0, totalPages: 0 })
+    expect(result.current.data.pagination).toEqual({
+      page: 1,
+      pageSize: 10,
+      totalCount: 0,
+      totalPages: 0,
+    })
   })
 
   it('isLoading/isErrorがそのままuiStateに反映されること', () => {

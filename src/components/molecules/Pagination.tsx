@@ -35,7 +35,10 @@ export const Pagination = ({ pagination, onPageChange }: PaginationProps) => {
           _selectedは今表示中のページと一致したボタンにだけ適用されるスタイル(枠線付きのoutline) */}
           <ChakraPagination.Items
             render={(item) => (
-              <IconButton aria-label={`Page ${item.value}`} variant={{ base: 'ghost', _selected: 'outline' }}>
+              <IconButton
+                aria-label={`Page ${item.value}`}
+                variant={{ base: 'ghost', _selected: 'outline' }}
+              >
                 {item.value}
               </IconButton>
             )}

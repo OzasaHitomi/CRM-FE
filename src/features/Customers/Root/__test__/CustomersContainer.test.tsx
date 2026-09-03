@@ -40,7 +40,10 @@ const mockCustomerForm: CustomerForm = {
 
 const mockMe: MeResponse = { userId: 'user-1', role: 'sales', name: 'Emily Chen' }
 
-const mockGetData = { customers: [], pagination: { page: 1, pageSize: 10, totalCount: 0, totalPages: 0 } }
+const mockGetData = {
+  customers: [],
+  pagination: { page: 1, pageSize: 10, totalCount: 0, totalPages: 0 },
+}
 const mockGetUiState = { isLoading: false, isError: false }
 const mockGetHandlers = { onPageChange: vi.fn() }
 const mockCreateData = { customerForm: mockCustomerForm, errors: {} }
