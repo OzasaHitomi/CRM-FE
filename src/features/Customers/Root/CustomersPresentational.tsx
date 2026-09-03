@@ -2,7 +2,6 @@ import { Flex, Heading, Text } from '@chakra-ui/react'
 
 import { LoadingPage } from '@/components/pages/LoadingPage'
 import { ErrorPage } from '@/components/pages/ErrorPage'
-import { Pagination } from '@/components/molecules/Pagination'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
 import type {
   GetCustomersResponseItem,
@@ -81,15 +80,14 @@ export const CustomersPresentational = ({ data, uiState, handlers }: Props) => {
 
       <CustomerTable
         customers={customers}
+        pagination={pagination}
         me={me}
         isAssigningCustomer={isAssigningCustomer}
         isUnassigningCustomer={isUnassigningCustomer}
         onAssignToMe={handlers.onAssignToMe}
         onUnassign={handlers.onUnassign}
+        onPageChange={handlers.onPageChange}
       />
-
-      {/* 表の下にページ切り替えボタンを表示する */}
-      <Pagination pagination={pagination} onPageChange={handlers.onPageChange} />
     </>
   )
 }

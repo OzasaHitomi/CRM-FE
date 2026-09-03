@@ -3,7 +3,6 @@ import { screen } from '@testing-library/react'
 
 import { customRender } from '@/tests/helpers/customRender'
 import { ErrorPage } from '@/components/pages/ErrorPage'
-import { Pagination } from '@/components/molecules/Pagination'
 import { CustomerTable } from '@/features/Customers/Root/ui/CustomerTable'
 import { CreateCustomerDialog } from '@/features/Customers/Root/ui/CreateCustomerDialog'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
@@ -21,9 +20,6 @@ vi.mock('@/components/pages/LoadingPage', () => ({
 vi.mock('@/components/pages/ErrorPage', () => ({
   ErrorPage: vi.fn(() => null),
 }))
-vi.mock('@/components/molecules/Pagination', () => ({
-  Pagination: vi.fn(() => null),
-}))
 vi.mock('@/features/Customers/Root/ui/CustomerTable', () => ({
   CustomerTable: vi.fn(() => null),
 }))
@@ -32,7 +28,6 @@ vi.mock('@/features/Customers/Root/ui/CreateCustomerDialog', () => ({
 }))
 
 const mockErrorPage = vi.mocked(ErrorPage)
-const mockPagination = vi.mocked(Pagination)
 const mockCustomerTable = vi.mocked(CustomerTable)
 const mockCreateCustomerDialog = vi.mocked(CreateCustomerDialog)
 
@@ -137,24 +132,16 @@ describe('CustomersPresentational', () => {
     expect(screen.getByText('15 customers')).toBeInTheDocument()
   })
 
-  it('Paginationへ正しいpropsが渡されること', () => {
+  it('CustomerTableへ正しいpropsが渡されること', () => {
     const pagination: PaginationResponseItem = {
       page: 2,
       pageSize: 10,
       totalCount: 15,
       totalPages: 2,
     }
-    renderPresentational({ pagination })
-
-    expect(mockPagination).toHaveBeenCalledWith(
-      expect.objectContaining({ pagination, onPageChange }),
-      undefined,
-    )
-  })
-
-  it('CustomerTableへ正しいpropsが渡されること', () => {
     renderPresentational({
       customers: mockCustomers,
+      pagination,
       isAssigningCustomer: true,
       isUnassigningCustomer: true,
     })
@@ -162,11 +149,13 @@ describe('CustomersPresentational', () => {
     expect(mockCustomerTable).toHaveBeenCalledWith(
       expect.objectContaining({
         customers: mockCustomers,
+        pagination,
         me: mockMe,
         isAssigningCustomer: true,
         isUnassigningCustomer: true,
         onAssignToMe,
         onUnassign,
+        onPageChange,
       }),
       undefined,
     )

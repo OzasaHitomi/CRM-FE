@@ -1,12 +1,22 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { customRender } from '@/tests/helpers/customRender'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type {
+  GetCustomersResponseItem,
+  PaginationResponseItem,
+} from '@/services/internal/backend/v1/types/response/customer'
 
 import { CustomerTable } from '../CustomerTable'
+import { Pagination } from '../Pagination/Pagination'
+
+vi.mock('../Pagination/Pagination', () => ({
+  Pagination: vi.fn(() => null),
+}))
+
+const mockPagination = vi.mocked(Pagination)
 
 const mockCustomers: GetCustomersResponseItem[] = [
   {
@@ -23,30 +33,45 @@ const mockCustomers: GetCustomersResponseItem[] = [
   },
 ]
 
+const mockPaginationData: PaginationResponseItem = {
+  page: 1,
+  pageSize: 10,
+  totalCount: 2,
+  totalPages: 1,
+}
+
 const renderTable = (overrides?: {
   customers?: GetCustomersResponseItem[]
+  pagination?: PaginationResponseItem
   me?: MeResponse | undefined
   isAssigningCustomer?: boolean
   isUnassigningCustomer?: boolean
 }) => {
   const onAssignToMe = vi.fn()
   const onUnassign = vi.fn()
+  const onPageChange = vi.fn()
 
   customRender(
     <CustomerTable
       customers={overrides?.customers ?? mockCustomers}
+      pagination={overrides?.pagination ?? mockPaginationData}
       me={overrides?.me}
       isAssigningCustomer={overrides?.isAssigningCustomer ?? false}
       isUnassigningCustomer={overrides?.isUnassigningCustomer ?? false}
       onAssignToMe={onAssignToMe}
       onUnassign={onUnassign}
+      onPageChange={onPageChange}
     />,
   )
 
-  return { onAssignToMe, onUnassign }
+  return { onAssignToMe, onUnassign, onPageChange }
 }
 
 describe('CustomerTable', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('各顧客の会社名・業種を表示すること', () => {
     renderTable()
 
@@ -111,6 +136,27 @@ describe('CustomerTable', () => {
 
     expect(screen.getByText('No customers found')).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
+  })
+
+  it('customersが空配列の場合、Paginationが表示されないこと', () => {
+    renderTable({ customers: [] })
+
+    expect(mockPagination).not.toHaveBeenCalled()
+  })
+
+  it('Paginationへ正しいpropsが渡されること', () => {
+    const pagination: PaginationResponseItem = {
+      page: 2,
+      pageSize: 10,
+      totalCount: 15,
+      totalPages: 2,
+    }
+    const { onPageChange } = renderTable({ pagination })
+
+    expect(mockPagination).toHaveBeenCalledWith(
+      expect.objectContaining({ pagination, onPageChange }),
+      undefined,
+    )
   })
 
   it('meがundefinedの場合、Action列にボタンが表示されないこと', () => {

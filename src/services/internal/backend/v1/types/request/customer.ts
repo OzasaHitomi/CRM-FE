@@ -17,3 +17,7 @@ export type UpdateCustomerRequest = {
   phone: string
   email: string
 }
+
+export type GetCustomersRequest = {
+  page: number
+}

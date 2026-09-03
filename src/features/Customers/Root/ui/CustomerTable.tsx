@@ -4,24 +4,33 @@ import { LuUsers } from 'react-icons/lu'
 
 import { IndustryBadge } from '@/components/atoms/IndustryBadge'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type {
+  GetCustomersResponseItem,
+  PaginationResponseItem,
+} from '@/services/internal/backend/v1/types/response/customer'
+
+import { Pagination } from '@/features/Customers/Root/ui/Pagination/Pagination'
 
 type CustomerTableProps = {
   customers: GetCustomersResponseItem[]
+  pagination: PaginationResponseItem
   me: MeResponse | undefined
   isAssigningCustomer: boolean
   isUnassigningCustomer: boolean
   onAssignToMe: (customerId: string) => void
   onUnassign: (customerId: string) => void
+  onPageChange: (page: number) => void
 }
 
 export const CustomerTable = ({
   customers,
+  pagination,
   me,
   isAssigningCustomer,
   isUnassigningCustomer,
   onAssignToMe,
   onUnassign,
+  onPageChange,
 }: CustomerTableProps) => {
   if (customers.length === 0) {
     return (
@@ -40,74 +49,77 @@ export const CustomerTable = ({
   }
 
   return (
-    <Table.Root variant='outline' style={{ tableLayout: 'fixed' }} bg={'white'}>
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeader w='40%' color={'gray'} fontWeight='bold' fontSize='xs'>
-            CUSTOMER
-          </Table.ColumnHeader>
-          <Table.ColumnHeader w='15%' color={'gray'} fontWeight='bold' fontSize='xs'>
-            INDUSTRY
-          </Table.ColumnHeader>
-          <Table.ColumnHeader w='20%' color={'gray'} fontWeight='bold' fontSize='xs'>
-            ASSIGNED REP
-          </Table.ColumnHeader>
-          <Table.ColumnHeader w='25%' />
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {customers.map((customer) => {
-          const canManageAssignment = me !== undefined && me.role !== 'admin'
-          const isAssignedToMe = customer.assignedUser?.userId === me?.userId
-          const canViewDetail = me !== undefined && (me.role !== 'sales' || isAssignedToMe)
+    <>
+      <Table.Root variant='outline' style={{ tableLayout: 'fixed' }} bg={'white'}>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader w='40%' color={'gray'} fontWeight='bold' fontSize='xs'>
+              CUSTOMER
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w='15%' color={'gray'} fontWeight='bold' fontSize='xs'>
+              INDUSTRY
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w='20%' color={'gray'} fontWeight='bold' fontSize='xs'>
+              ASSIGNED REP
+            </Table.ColumnHeader>
+            <Table.ColumnHeader w='25%' />
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {customers.map((customer) => {
+            const canManageAssignment = me !== undefined && me.role !== 'admin'
+            const isAssignedToMe = customer.assignedUser?.userId === me?.userId
+            const canViewDetail = me !== undefined && (me.role !== 'sales' || isAssignedToMe)
 
-          return (
-            <Table.Row key={customer.customerId}>
-              <Table.Cell>
-                {canViewDetail ? (
-                  <Text asChild color='blue.600' fontWeight='medium'>
-                    <RouterLink to={`/customers/${customer.customerId}`}>
-                      {customer.companyName}
-                    </RouterLink>
-                  </Text>
-                ) : (
-                  <Text>{customer.companyName}</Text>
-                )}
-              </Table.Cell>
-              <Table.Cell>
-                <IndustryBadge industry={customer.industry} />
-              </Table.Cell>
-              <Table.Cell>{customer.assignedUser?.name ?? 'Unassigned'}</Table.Cell>
-              <Table.Cell>
-                {canManageAssignment && !customer.assignedUser && (
-                  <Button
-                    size='sm'
-                    variant='outline'
-                    colorPalette='blue'
-                    loading={isAssigningCustomer}
-                    onClick={() => onAssignToMe(customer.customerId)}
-                  >
-                    Assign to me
-                  </Button>
-                )}
-                {canManageAssignment &&
-                  customer.assignedUser &&
-                  (isAssignedToMe || me?.role === 'manager') && (
+            return (
+              <Table.Row key={customer.customerId}>
+                <Table.Cell>
+                  {canViewDetail ? (
+                    <Text asChild color='blue.600' fontWeight='medium'>
+                      <RouterLink to={`/customers/${customer.customerId}`}>
+                        {customer.companyName}
+                      </RouterLink>
+                    </Text>
+                  ) : (
+                    <Text>{customer.companyName}</Text>
+                  )}
+                </Table.Cell>
+                <Table.Cell>
+                  <IndustryBadge industry={customer.industry} />
+                </Table.Cell>
+                <Table.Cell>{customer.assignedUser?.name ?? 'Unassigned'}</Table.Cell>
+                <Table.Cell>
+                  {canManageAssignment && !customer.assignedUser && (
                     <Button
                       size='sm'
                       variant='outline'
-                      colorPalette='red'
-                      loading={isUnassigningCustomer}
-                      onClick={() => onUnassign(customer.customerId)}
+                      colorPalette='blue'
+                      loading={isAssigningCustomer}
+                      onClick={() => onAssignToMe(customer.customerId)}
                     >
-                      Unassign
+                      Assign to me
                     </Button>
                   )}
-              </Table.Cell>
-            </Table.Row>
-          )
-        })}
-      </Table.Body>
-    </Table.Root>
+                  {canManageAssignment &&
+                    customer.assignedUser &&
+                    (isAssignedToMe || me?.role === 'manager') && (
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        colorPalette='red'
+                        loading={isUnassigningCustomer}
+                        onClick={() => onUnassign(customer.customerId)}
+                      >
+                        Unassign
+                      </Button>
+                    )}
+                </Table.Cell>
+              </Table.Row>
+            )
+          })}
+        </Table.Body>
+      </Table.Root>
+      <Pagination pagination={pagination} onPageChange={onPageChange} />
+    </>
   )
 }
