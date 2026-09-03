@@ -3,7 +3,7 @@ import { waitFor } from '@testing-library/react'
 
 import { customRenderHook } from '@/tests/helpers/customRenderHook'
 import { getCustomers } from '@/services/internal/backend/v1/customers'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type { GetCustomersResponse } from '@/services/internal/backend/v1/types/response/customer'
 
 import { useGetCustomersQuery } from '../useGetCustomersQuery'
 
@@ -19,26 +19,42 @@ describe('useGetCustomersQuery', () => {
   })
 
   it('getCustomersが成功した場合、dataに反映されること', async () => {
-    const mockResponse: GetCustomersResponseItem[] = [
-      {
-        customerId: 'customer-1',
-        companyName: 'Northwind Logistics',
-        industry: 'manufacturing',
-        assignedUser: null,
-      },
-    ]
+    const mockResponse: GetCustomersResponse = {
+      customers: [
+        {
+          customerId: 'customer-1',
+          companyName: 'Northwind Logistics',
+          industry: 'manufacturing',
+          assignedUser: null,
+        },
+      ],
+      pagination: { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 },
+    }
     mockGetCustomers.mockResolvedValueOnce(mockResponse)
 
-    const { result } = customRenderHook(() => useGetCustomersQuery())
+    const { result } = customRenderHook(() => useGetCustomersQuery(1))
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(mockResponse)
   })
 
+  it('pageを渡すと、getCustomersへそのまま渡ること', async () => {
+    const mockResponse: GetCustomersResponse = {
+      customers: [],
+      pagination: { page: 2, pageSize: 10, totalCount: 0, totalPages: 0 },
+    }
+    mockGetCustomers.mockResolvedValueOnce(mockResponse)
+
+    const { result } = customRenderHook(() => useGetCustomersQuery(2))
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(mockGetCustomers).toHaveBeenCalledWith(2)
+  })
+
   it('getCustomersが失敗した場合、isErrorになること', async () => {
     mockGetCustomers.mockRejectedValueOnce(new Error('failed'))
 
-    const { result } = customRenderHook(() => useGetCustomersQuery())
+    const { result } = customRenderHook(() => useGetCustomersQuery(1))
 
     await waitFor(() => expect(result.current.isError).toBe(true))
   })

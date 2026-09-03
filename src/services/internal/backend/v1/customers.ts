@@ -13,14 +13,16 @@ import {
   type CreateCustomerResponse,
   type DealResponseItem,
   type GetCustomerResponse,
-  type GetCustomersResponseItem,
+  type GetCustomersResponse,
   type UpdateCustomerResponse,
 } from './types/response/customer'
 
 const BASE_URL = '/customers'
 
-export const getCustomers = async (): Promise<GetCustomersResponseItem[]> => {
-  const response = await internalBackendV1Client.get<unknown>(BASE_URL)
+// pageは「何ページ目が欲しいか」をクエリパラメータとして送るだけ。
+// 1ページの件数(pageSize)はサーバー側で固定されているのでFEからは渡さない。
+export const getCustomers = async (page: number): Promise<GetCustomersResponse> => {
+  const response = await internalBackendV1Client.get<unknown>(BASE_URL, { params: { page } })
   return getCustomersResponseSchema.parse(response.data)
 }
 

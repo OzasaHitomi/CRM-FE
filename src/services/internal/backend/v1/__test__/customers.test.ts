@@ -16,7 +16,7 @@ import type {
   AssignCustomerUserResponse,
   CreateCustomerResponse,
   DealResponseItem,
-  GetCustomersResponseItem,
+  GetCustomersResponse,
   UpdateCustomerResponse,
 } from '../types/response/customer'
 
@@ -63,27 +63,30 @@ describe('customers service', () => {
   })
 
   describe('getCustomers', () => {
-    const mockResponse: GetCustomersResponseItem[] = [
-      {
-        customerId: 'customer-1',
-        companyName: 'Northwind Logistics',
-        industry: 'manufacturing',
-        assignedUser: mockAssignedUser,
-      },
-    ]
+    const mockResponse: GetCustomersResponse = {
+      customers: [
+        {
+          customerId: 'customer-1',
+          companyName: 'Northwind Logistics',
+          industry: 'manufacturing',
+          assignedUser: mockAssignedUser,
+        },
+      ],
+      pagination: { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 },
+    }
 
-    it('正しいエンドポイントを呼ぶこと', async () => {
+    it('正しいエンドポイントとページ番号を指定して呼ぶこと', async () => {
       mockClient.get.mockResolvedValueOnce({ data: mockResponse })
 
-      await getCustomers()
+      await getCustomers(1)
 
-      expect(mockClient.get).toHaveBeenCalledWith('/customers')
+      expect(mockClient.get).toHaveBeenCalledWith('/customers', { params: { page: 1 } })
     })
 
     it('パース済みのレスポンスを返すこと', async () => {
       mockClient.get.mockResolvedValueOnce({ data: mockResponse })
 
-      const result = await getCustomers()
+      const result = await getCustomers(1)
 
       expect(result).toEqual(mockResponse)
     })

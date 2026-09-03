@@ -3,10 +3,14 @@ import { screen } from '@testing-library/react'
 
 import { customRender } from '@/tests/helpers/customRender'
 import { ErrorPage } from '@/components/pages/ErrorPage'
+import { Pagination } from '@/components/molecules/Pagination'
 import { CustomerTable } from '@/features/Customers/Root/ui/CustomerTable'
 import { CreateCustomerDialog } from '@/features/Customers/Root/ui/CreateCustomerDialog'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type {
+  GetCustomersResponseItem,
+  PaginationResponseItem,
+} from '@/services/internal/backend/v1/types/response/customer'
 import type { CustomerForm, CustomerFormErrors } from '@/features/Customers/types/customerForm'
 
 import { CustomersPresentational } from '../CustomersPresentational'
@@ -17,6 +21,9 @@ vi.mock('@/components/pages/LoadingPage', () => ({
 vi.mock('@/components/pages/ErrorPage', () => ({
   ErrorPage: vi.fn(() => null),
 }))
+vi.mock('@/components/molecules/Pagination', () => ({
+  Pagination: vi.fn(() => null),
+}))
 vi.mock('@/features/Customers/Root/ui/CustomerTable', () => ({
   CustomerTable: vi.fn(() => null),
 }))
@@ -25,6 +32,7 @@ vi.mock('@/features/Customers/Root/ui/CreateCustomerDialog', () => ({
 }))
 
 const mockErrorPage = vi.mocked(ErrorPage)
+const mockPagination = vi.mocked(Pagination)
 const mockCustomerTable = vi.mocked(CustomerTable)
 const mockCreateCustomerDialog = vi.mocked(CreateCustomerDialog)
 
@@ -36,6 +44,8 @@ const mockCustomers: GetCustomersResponseItem[] = [
     assignedUser: { userId: 'user-1', name: 'Emily Chen' },
   },
 ]
+
+const mockPaginationData: PaginationResponseItem = { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 }
 
 const mockMe: MeResponse = { userId: 'user-1', role: 'sales', name: 'Emily Chen' }
 const mockCustomerForm: CustomerForm = {
@@ -53,9 +63,11 @@ const onChangeCustomerFormField = vi.fn()
 const onSubmitCreateCustomer = vi.fn()
 const onAssignToMe = vi.fn()
 const onUnassign = vi.fn()
+const onPageChange = vi.fn()
 
 const renderPresentational = (overrides?: {
   customers?: GetCustomersResponseItem[]
+  pagination?: PaginationResponseItem
   isLoading?: boolean
   isError?: boolean
   isDialogOpen?: boolean
@@ -67,6 +79,7 @@ const renderPresentational = (overrides?: {
     <CustomersPresentational
       data={{
         customers: overrides?.customers ?? mockCustomers,
+        pagination: overrides?.pagination ?? mockPaginationData,
         customerForm: mockCustomerForm,
         errors: mockErrors,
         me: mockMe,
@@ -86,6 +99,7 @@ const renderPresentational = (overrides?: {
         onSubmitCreateCustomer,
         onAssignToMe,
         onUnassign,
+        onPageChange,
       }}
     />,
   )
@@ -107,10 +121,20 @@ describe('CustomersPresentational', () => {
     )
   })
 
-  it('customersの件数を表示すること', () => {
-    renderPresentational({ customers: mockCustomers })
+  it('pagination.totalCountの件数を表示すること', () => {
+    renderPresentational({ pagination: { page: 1, pageSize: 10, totalCount: 15, totalPages: 2 } })
 
-    expect(screen.getByText('1 customers')).toBeInTheDocument()
+    expect(screen.getByText('15 customers')).toBeInTheDocument()
+  })
+
+  it('Paginationへ正しいpropsが渡されること', () => {
+    const pagination: PaginationResponseItem = { page: 2, pageSize: 10, totalCount: 15, totalPages: 2 }
+    renderPresentational({ pagination })
+
+    expect(mockPagination).toHaveBeenCalledWith(
+      expect.objectContaining({ pagination, onPageChange }),
+      undefined,
+    )
   })
 
   it('CustomerTableへ正しいpropsが渡されること', () => {
