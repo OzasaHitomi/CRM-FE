@@ -49,4 +49,19 @@ describe('Pagination', () => {
 
     expect(onPageChange).toHaveBeenCalledWith(2)
   })
+
+  it('Prevをクリックすると、onPageChangeが前のページ番号で呼ばれること', async () => {
+    const onPageChange = vi.fn()
+    const user = userEvent.setup()
+    customRender(
+      <Pagination
+        pagination={{ page: 2, pageSize: 10, totalCount: 15, totalPages: 2 }}
+        onPageChange={onPageChange}
+      />,
+    )
+
+    await user.click(screen.getByLabelText('Previous page'))
+
+    expect(onPageChange).toHaveBeenCalledWith(1)
+  })
 })

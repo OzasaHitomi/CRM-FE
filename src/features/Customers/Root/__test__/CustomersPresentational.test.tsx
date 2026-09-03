@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 
 import { customRender } from '@/tests/helpers/customRender'
@@ -73,6 +73,7 @@ const onPageChange = vi.fn()
 const renderPresentational = (overrides?: {
   customers?: GetCustomersResponseItem[]
   pagination?: PaginationResponseItem
+  me?: MeResponse
   isLoading?: boolean
   isError?: boolean
   isDialogOpen?: boolean
@@ -87,7 +88,7 @@ const renderPresentational = (overrides?: {
         pagination: overrides?.pagination ?? mockPaginationData,
         customerForm: mockCustomerForm,
         errors: mockErrors,
-        me: mockMe,
+        me: overrides?.me ?? mockMe,
       }}
       uiState={{
         isLoading: overrides?.isLoading ?? false,
@@ -111,6 +112,10 @@ const renderPresentational = (overrides?: {
 }
 
 describe('CustomersPresentational', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('isLoadingがtrueの場合、LoadingPageを表示すること', () => {
     renderPresentational({ isLoading: true })
 
@@ -183,5 +188,17 @@ describe('CustomersPresentational', () => {
       }),
       undefined,
     )
+  })
+
+  it('meがadminロールの場合、CreateCustomerDialogが表示されないこと', () => {
+    renderPresentational({ me: { ...mockMe, role: 'admin' } })
+
+    expect(mockCreateCustomerDialog).not.toHaveBeenCalled()
+  })
+
+  it('meがadmin以外のロールの場合、CreateCustomerDialogが表示されること', () => {
+    renderPresentational({ me: { ...mockMe, role: 'sales' } })
+
+    expect(mockCreateCustomerDialog).toHaveBeenCalled()
   })
 })
