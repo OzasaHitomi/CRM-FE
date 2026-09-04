@@ -48,7 +48,7 @@ describe('useGetCustomersQuery', () => {
     const { result } = customRenderHook(() => useGetCustomersQuery(2))
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockGetCustomers).toHaveBeenCalledWith(2)
+    expect(mockGetCustomers).toHaveBeenCalledWith({ page: 2 })
   })
 
   it('getCustomersが失敗した場合、isErrorになること', async () => {

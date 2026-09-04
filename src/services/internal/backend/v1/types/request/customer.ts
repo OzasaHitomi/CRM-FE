@@ -18,6 +18,6 @@ export type UpdateCustomerRequest = {
   email: string
 }
 
-export type GetCustomersRequest = {
+export type GetCustomersRequestQueryParams = {
   page: number
 }

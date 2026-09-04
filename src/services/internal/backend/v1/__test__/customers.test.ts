@@ -78,7 +78,7 @@ describe('customers service', () => {
     it('正しいエンドポイントとページ番号を指定して呼ぶこと', async () => {
       mockClient.get.mockResolvedValueOnce({ data: mockResponse })
 
-      await getCustomers(1)
+      await getCustomers({ page: 1 })
 
       expect(mockClient.get).toHaveBeenCalledWith('/customers', { params: { page: 1 } })
     })

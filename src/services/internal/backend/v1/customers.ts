@@ -2,7 +2,7 @@ import { internalBackendV1Client } from './client'
 
 import {
   type CreateCustomerRequest,
-  type GetCustomersRequest,
+  type GetCustomersRequestQueryParams,
   type UpdateCustomerRequest,
 } from './types/request/customer'
 import { type CreateDealRequest } from './types/request/deal'
@@ -25,8 +25,9 @@ const BASE_URL = '/customers'
 
 // pageは「何ページ目が欲しいか」をクエリパラメータとして送るだけ。
 // 1ページの件数(pageSize)はサーバー側で固定されているのでFEからは渡さない。
-export const getCustomers = async (page: number): Promise<GetCustomersResponse> => {
-  const params: GetCustomersRequest = { page }
+export const getCustomers = async (
+  params?: GetCustomersRequestQueryParams,
+): Promise<GetCustomersResponse> => {
   const response = await internalBackendV1Client.get<unknown>(BASE_URL, { params })
   return getCustomersResponseSchema.parse(response.data)
 }

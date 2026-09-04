@@ -9,7 +9,7 @@ import type {
   PaginationResponseItem,
 } from '@/services/internal/backend/v1/types/response/customer'
 
-import { Pagination } from '@/features/Customers/Root/ui/Pagination/Pagination'
+import { Pagination } from '@/components/molecules/Pagination'
 
 type CustomerTableProps = {
   customers: GetCustomersResponseItem[]

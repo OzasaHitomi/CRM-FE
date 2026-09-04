@@ -10,9 +10,9 @@ import type {
 } from '@/services/internal/backend/v1/types/response/customer'
 
 import { CustomerTable } from '../CustomerTable'
-import { Pagination } from '../Pagination/Pagination'
+import { Pagination } from '@/components/molecules/Pagination'
 
-vi.mock('../Pagination/Pagination', () => ({
+vi.mock('@/components/molecules/Pagination', () => ({
   Pagination: vi.fn(() => null),
 }))
 

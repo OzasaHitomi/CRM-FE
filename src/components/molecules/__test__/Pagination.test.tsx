@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { customRender } from '@/tests/helpers/customRender'
 
-import { Pagination } from '../Pagination'
+import { Pagination } from '@/components/molecules/Pagination'
 
 describe('Pagination', () => {
   it('ページ番号・Prev/Nextボタンが表示されること', () => {
