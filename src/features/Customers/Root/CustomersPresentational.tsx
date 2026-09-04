@@ -3,7 +3,10 @@ import { Flex, Heading, Text } from '@chakra-ui/react'
 import { LoadingPage } from '@/components/pages/LoadingPage'
 import { ErrorPage } from '@/components/pages/ErrorPage'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type {
+  GetCustomersResponseItem,
+  PaginationResponseItem,
+} from '@/services/internal/backend/v1/types/response/customer'
 
 import { CustomerTable } from '@/features/Customers/Root/ui/CustomerTable'
 import { CreateCustomerDialog } from '@/features/Customers/Root/ui/CreateCustomerDialog'
@@ -12,6 +15,7 @@ import type { CustomerForm, CustomerFormErrors } from '@/features/Customers/type
 type Props = {
   data: {
     customers: GetCustomersResponseItem[]
+    pagination: PaginationResponseItem
     customerForm: CustomerForm
     errors: CustomerFormErrors
     me: MeResponse | undefined
@@ -34,11 +38,12 @@ type Props = {
     onSubmitCreateCustomer: () => void
     onAssignToMe: (customerId: string) => void
     onUnassign: (customerId: string) => void
+    onPageChange: (page: number) => void
   }
 }
 
 export const CustomersPresentational = ({ data, uiState, handlers }: Props) => {
-  const { customers, customerForm, errors, me } = data
+  const { customers, pagination, customerForm, errors, me } = data
   const {
     isLoading,
     isError,
@@ -68,17 +73,20 @@ export const CustomersPresentational = ({ data, uiState, handlers }: Props) => {
           />
         )}
       </Flex>
+      {/* customers.lengthは今のページの件数なので使わず、全体件数(pagination.totalCount)を表示する */}
       <Text color='fg.muted' mb='4'>
-        {customers.length} customers
+        {pagination.totalCount} customers
       </Text>
 
       <CustomerTable
         customers={customers}
+        pagination={pagination}
         me={me}
         isAssigningCustomer={isAssigningCustomer}
         isUnassigningCustomer={isUnassigningCustomer}
         onAssignToMe={handlers.onAssignToMe}
         onUnassign={handlers.onUnassign}
+        onPageChange={handlers.onPageChange}
       />
     </>
   )

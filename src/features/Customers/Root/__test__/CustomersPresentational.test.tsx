@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 
 import { customRender } from '@/tests/helpers/customRender'
@@ -6,7 +6,10 @@ import { ErrorPage } from '@/components/pages/ErrorPage'
 import { CustomerTable } from '@/features/Customers/Root/ui/CustomerTable'
 import { CreateCustomerDialog } from '@/features/Customers/Root/ui/CreateCustomerDialog'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
-import type { GetCustomersResponseItem } from '@/services/internal/backend/v1/types/response/customer'
+import type {
+  GetCustomersResponseItem,
+  PaginationResponseItem,
+} from '@/services/internal/backend/v1/types/response/customer'
 import type { CustomerForm, CustomerFormErrors } from '@/features/Customers/types/customerForm'
 
 import { CustomersPresentational } from '../CustomersPresentational'
@@ -37,6 +40,13 @@ const mockCustomers: GetCustomersResponseItem[] = [
   },
 ]
 
+const mockPaginationData: PaginationResponseItem = {
+  page: 1,
+  pageSize: 10,
+  totalCount: 1,
+  totalPages: 1,
+}
+
 const mockMe: MeResponse = { userId: 'user-1', role: 'sales', name: 'Emily Chen' }
 const mockCustomerForm: CustomerForm = {
   companyName: '',
@@ -53,9 +63,12 @@ const onChangeCustomerFormField = vi.fn()
 const onSubmitCreateCustomer = vi.fn()
 const onAssignToMe = vi.fn()
 const onUnassign = vi.fn()
+const onPageChange = vi.fn()
 
 const renderPresentational = (overrides?: {
   customers?: GetCustomersResponseItem[]
+  pagination?: PaginationResponseItem
+  me?: MeResponse
   isLoading?: boolean
   isError?: boolean
   isDialogOpen?: boolean
@@ -67,9 +80,10 @@ const renderPresentational = (overrides?: {
     <CustomersPresentational
       data={{
         customers: overrides?.customers ?? mockCustomers,
+        pagination: overrides?.pagination ?? mockPaginationData,
         customerForm: mockCustomerForm,
         errors: mockErrors,
-        me: mockMe,
+        me: overrides?.me ?? mockMe,
       }}
       uiState={{
         isLoading: overrides?.isLoading ?? false,
@@ -86,12 +100,17 @@ const renderPresentational = (overrides?: {
         onSubmitCreateCustomer,
         onAssignToMe,
         onUnassign,
+        onPageChange,
       }}
     />,
   )
 }
 
 describe('CustomersPresentational', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('isLoadingがtrueの場合、LoadingPageを表示すること', () => {
     renderPresentational({ isLoading: true })
 
@@ -107,15 +126,22 @@ describe('CustomersPresentational', () => {
     )
   })
 
-  it('customersの件数を表示すること', () => {
-    renderPresentational({ customers: mockCustomers })
+  it('pagination.totalCountの件数を表示すること', () => {
+    renderPresentational({ pagination: { page: 1, pageSize: 10, totalCount: 15, totalPages: 2 } })
 
-    expect(screen.getByText('1 customers')).toBeInTheDocument()
+    expect(screen.getByText('15 customers')).toBeInTheDocument()
   })
 
   it('CustomerTableへ正しいpropsが渡されること', () => {
+    const pagination: PaginationResponseItem = {
+      page: 2,
+      pageSize: 10,
+      totalCount: 15,
+      totalPages: 2,
+    }
     renderPresentational({
       customers: mockCustomers,
+      pagination,
       isAssigningCustomer: true,
       isUnassigningCustomer: true,
     })
@@ -123,11 +149,13 @@ describe('CustomersPresentational', () => {
     expect(mockCustomerTable).toHaveBeenCalledWith(
       expect.objectContaining({
         customers: mockCustomers,
+        pagination,
         me: mockMe,
         isAssigningCustomer: true,
         isUnassigningCustomer: true,
         onAssignToMe,
         onUnassign,
+        onPageChange,
       }),
       undefined,
     )
@@ -149,5 +177,17 @@ describe('CustomersPresentational', () => {
       }),
       undefined,
     )
+  })
+
+  it('meがadminロールの場合、CreateCustomerDialogが表示されないこと', () => {
+    renderPresentational({ me: { ...mockMe, role: 'admin' } })
+
+    expect(mockCreateCustomerDialog).not.toHaveBeenCalled()
+  })
+
+  it('meがadmin以外のロールの場合、CreateCustomerDialogが表示されること', () => {
+    renderPresentational({ me: { ...mockMe, role: 'sales' } })
+
+    expect(mockCreateCustomerDialog).toHaveBeenCalled()
   })
 })

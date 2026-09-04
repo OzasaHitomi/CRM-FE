@@ -21,7 +21,12 @@ export const CustomersContainer = () => {
           ...createCustomerHandler.uiState,
           ...assignCustomerHandler.uiState,
         }}
-        handlers={{ ...createCustomerHandler.handlers, ...assignCustomerHandler.handlers }}
+        handlers={{
+          // onPageChangeを渡すためにgetCustomersHandler.handlersをマージ（複数のオブジェクトを1つに合体させる）対象に追加
+          ...getCustomersHandler.handlers,
+          ...createCustomerHandler.handlers,
+          ...assignCustomerHandler.handlers,
+        }}
       />
     </>
   )

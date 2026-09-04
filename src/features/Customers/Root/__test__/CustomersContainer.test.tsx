@@ -40,8 +40,12 @@ const mockCustomerForm: CustomerForm = {
 
 const mockMe: MeResponse = { userId: 'user-1', role: 'sales', name: 'Emily Chen' }
 
-const mockGetData = { customers: [] }
+const mockGetData = {
+  customers: [],
+  pagination: { page: 1, pageSize: 10, totalCount: 0, totalPages: 0 },
+}
 const mockGetUiState = { isLoading: false, isError: false }
+const mockGetHandlers = { onPageChange: vi.fn() }
 const mockCreateData = { customerForm: mockCustomerForm, errors: {} }
 const mockCreateUiState = { isDialogOpen: false, isPending: false }
 const mockCreateHandlers = {
@@ -57,7 +61,11 @@ const mockAssignHandlers = { onAssignToMe: vi.fn(), onUnassign: vi.fn() }
 describe('CustomersContainer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUseGetCustomersHandler.mockReturnValue({ data: mockGetData, uiState: mockGetUiState })
+    mockUseGetCustomersHandler.mockReturnValue({
+      data: mockGetData,
+      uiState: mockGetUiState,
+      handlers: mockGetHandlers,
+    })
     mockUseCreateCustomerHandler.mockReturnValue({
       data: mockCreateData,
       uiState: mockCreateUiState,
@@ -92,12 +100,12 @@ describe('CustomersContainer', () => {
     )
   })
 
-  it('createCustomerHandlerとassignCustomerHandlerのhandlersがマージされて渡されること', () => {
+  it('3つのhandlerのhandlersがマージされて渡されること', () => {
     customRender(<CustomersContainer />)
 
     expect(mockCustomersPresentational).toHaveBeenCalledWith(
       expect.objectContaining({
-        handlers: { ...mockCreateHandlers, ...mockAssignHandlers },
+        handlers: { ...mockGetHandlers, ...mockCreateHandlers, ...mockAssignHandlers },
       }),
       undefined,
     )

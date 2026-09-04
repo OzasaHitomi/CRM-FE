@@ -44,7 +44,23 @@ export const getCustomersResponseItemSchema = z.object({
 
 export type GetCustomersResponseItem = z.infer<typeof getCustomersResponseItemSchema>
 
-export const getCustomersResponseSchema = z.array(getCustomersResponseItemSchema)
+// 顧客一覧APIが返す「ページ情報」の形。今何ページ目か・全部で何件/何ページあるかを持つ。
+export const paginationResponseItemSchema = z.object({
+  page: z.number(),
+  pageSize: z.number(),
+  totalCount: z.number(),
+  totalPages: z.number(),
+})
+
+export type PaginationResponseItem = z.infer<typeof paginationResponseItemSchema>
+
+// 顧客一覧APIのレスポンスは「今のページの顧客配列」と「ページ情報」がセットで返ってくる。
+export const getCustomersResponseSchema = z.object({
+  customers: z.array(getCustomersResponseItemSchema),
+  pagination: paginationResponseItemSchema,
+})
+
+export type GetCustomersResponse = z.infer<typeof getCustomersResponseSchema>
 
 export const getCustomerResponseSchema = z.object({
   customerId: z.string(),
