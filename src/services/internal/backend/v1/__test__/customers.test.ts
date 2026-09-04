@@ -83,10 +83,20 @@ describe('customers service', () => {
       expect(mockClient.get).toHaveBeenCalledWith('/customers', { params: { page: 1 } })
     })
 
+    it('industryを指定した場合、パラメータに含めて呼ぶこと', async () => {
+      mockClient.get.mockResolvedValueOnce({ data: mockResponse })
+
+      await getCustomers({ page: 1, industry: 'finance' })
+
+      expect(mockClient.get).toHaveBeenCalledWith('/customers', {
+        params: { page: 1, industry: 'finance' },
+      })
+    })
+
     it('パース済みのレスポンスを返すこと', async () => {
       mockClient.get.mockResolvedValueOnce({ data: mockResponse })
 
-      const result = await getCustomers(1)
+      const result = await getCustomers({ page: 1 })
 
       expect(result).toEqual(mockResponse)
     })

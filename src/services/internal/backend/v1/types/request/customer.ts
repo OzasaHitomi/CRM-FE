@@ -20,4 +20,5 @@ export type UpdateCustomerRequest = {
 
 export type GetCustomersRequestQueryParams = {
   page: number
+  industry?: IndustryType
 }

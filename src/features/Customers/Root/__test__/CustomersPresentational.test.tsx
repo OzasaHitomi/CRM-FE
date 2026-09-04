@@ -5,11 +5,13 @@ import { customRender } from '@/tests/helpers/customRender'
 import { ErrorPage } from '@/components/pages/ErrorPage'
 import { CustomerTable } from '@/features/Customers/Root/ui/CustomerTable'
 import { CreateCustomerDialog } from '@/features/Customers/Root/ui/CreateCustomerDialog'
+import { CustomerIndustryFilter } from '@/features/Customers/Root/ui/CustomerIndustryFilter'
 import type { MeResponse } from '@/services/internal/backend/v1/types/response/auth'
 import type {
   GetCustomersResponseItem,
   PaginationResponseItem,
 } from '@/services/internal/backend/v1/types/response/customer'
+import type { IndustryType } from '@/share/types/industryType'
 import type { CustomerForm, CustomerFormErrors } from '@/features/Customers/types/customerForm'
 
 import { CustomersPresentational } from '../CustomersPresentational'
@@ -26,10 +28,14 @@ vi.mock('@/features/Customers/Root/ui/CustomerTable', () => ({
 vi.mock('@/features/Customers/Root/ui/CreateCustomerDialog', () => ({
   CreateCustomerDialog: vi.fn(() => null),
 }))
+vi.mock('@/features/Customers/Root/ui/CustomerIndustryFilter', () => ({
+  CustomerIndustryFilter: vi.fn(() => null),
+}))
 
 const mockErrorPage = vi.mocked(ErrorPage)
 const mockCustomerTable = vi.mocked(CustomerTable)
 const mockCreateCustomerDialog = vi.mocked(CreateCustomerDialog)
+const mockCustomerIndustryFilter = vi.mocked(CustomerIndustryFilter)
 
 const mockCustomers: GetCustomersResponseItem[] = [
   {
@@ -64,11 +70,13 @@ const onSubmitCreateCustomer = vi.fn()
 const onAssignToMe = vi.fn()
 const onUnassign = vi.fn()
 const onPageChange = vi.fn()
+const onIndustryChange = vi.fn()
 
 const renderPresentational = (overrides?: {
   customers?: GetCustomersResponseItem[]
   pagination?: PaginationResponseItem
   me?: MeResponse
+  industry?: IndustryType
   isLoading?: boolean
   isError?: boolean
   isDialogOpen?: boolean
@@ -84,6 +92,7 @@ const renderPresentational = (overrides?: {
         customerForm: mockCustomerForm,
         errors: mockErrors,
         me: overrides?.me ?? mockMe,
+        industry: overrides?.industry,
       }}
       uiState={{
         isLoading: overrides?.isLoading ?? false,
@@ -101,6 +110,7 @@ const renderPresentational = (overrides?: {
         onAssignToMe,
         onUnassign,
         onPageChange,
+        onIndustryChange,
       }}
     />,
   )
@@ -157,6 +167,15 @@ describe('CustomersPresentational', () => {
         onUnassign,
         onPageChange,
       }),
+      undefined,
+    )
+  })
+
+  it('CustomerIndustryFilterへ正しいpropsが渡されること', () => {
+    renderPresentational({ industry: 'finance' })
+
+    expect(mockCustomerIndustryFilter).toHaveBeenCalledWith(
+      expect.objectContaining({ industry: 'finance', onIndustryChange }),
       undefined,
     )
   })
