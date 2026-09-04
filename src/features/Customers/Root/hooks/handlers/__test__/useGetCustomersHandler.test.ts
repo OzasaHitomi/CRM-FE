@@ -73,12 +73,12 @@ describe('useGetCustomersHandler', () => {
     expect(result.current.uiState).toEqual({ isLoading: true, isError: true })
   })
 
-  it('初期状態でuseGetCustomersQueryが1ページ目で呼ばれること', () => {
+  it('初期状態でuseGetCustomersQueryが1ページ目・業界フィルタなしで呼ばれること', () => {
     setup({})
 
     customRenderHook(() => useGetCustomersHandler())
 
-    expect(mockUseGetCustomersQuery).toHaveBeenCalledWith(1)
+    expect(mockUseGetCustomersQuery).toHaveBeenCalledWith({ page: 1, industry: undefined })
   })
 
   it('onPageChangeを呼ぶと、useGetCustomersQueryへ渡るpageが変わること', () => {
@@ -89,6 +89,40 @@ describe('useGetCustomersHandler', () => {
       result.current.handlers.onPageChange(2)
     })
 
-    expect(mockUseGetCustomersQuery).toHaveBeenLastCalledWith(2)
+    expect(mockUseGetCustomersQuery).toHaveBeenLastCalledWith({ page: 2, industry: undefined })
+  })
+
+  it('data.industryの初期値がundefined(全て表示)になること', () => {
+    setup({})
+
+    const { result } = customRenderHook(() => useGetCustomersHandler())
+
+    expect(result.current.data.industry).toBeUndefined()
+  })
+
+  it('onIndustryChangeを呼ぶと、useGetCustomersQueryへ渡るindustryが変わること', () => {
+    setup({})
+    const { result } = customRenderHook(() => useGetCustomersHandler())
+
+    act(() => {
+      result.current.handlers.onIndustryChange('finance')
+    })
+
+    expect(mockUseGetCustomersQuery).toHaveBeenLastCalledWith({ page: 1, industry: 'finance' })
+    expect(result.current.data.industry).toBe('finance')
+  })
+
+  it('ページ移動後にonIndustryChangeを呼ぶと、pageが1にリセットされること', () => {
+    setup({})
+    const { result } = customRenderHook(() => useGetCustomersHandler())
+
+    act(() => {
+      result.current.handlers.onPageChange(2)
+    })
+    act(() => {
+      result.current.handlers.onIndustryChange('finance')
+    })
+
+    expect(mockUseGetCustomersQuery).toHaveBeenLastCalledWith({ page: 1, industry: 'finance' })
   })
 })

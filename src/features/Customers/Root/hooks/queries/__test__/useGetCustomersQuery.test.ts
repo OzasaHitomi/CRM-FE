@@ -32,29 +32,31 @@ describe('useGetCustomersQuery', () => {
     }
     mockGetCustomers.mockResolvedValueOnce(mockResponse)
 
-    const { result } = customRenderHook(() => useGetCustomersQuery(1))
+    const { result } = customRenderHook(() => useGetCustomersQuery({ page: 1 }))
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(mockResponse)
   })
 
-  it('pageを渡すと、getCustomersへそのまま渡ること', async () => {
+  it('paramsを渡すと、getCustomersへそのまま渡ること', async () => {
     const mockResponse: GetCustomersResponse = {
       customers: [],
       pagination: { page: 2, pageSize: 10, totalCount: 0, totalPages: 0 },
     }
     mockGetCustomers.mockResolvedValueOnce(mockResponse)
 
-    const { result } = customRenderHook(() => useGetCustomersQuery(2))
+    const { result } = customRenderHook(() =>
+      useGetCustomersQuery({ page: 2, industry: 'finance' }),
+    )
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockGetCustomers).toHaveBeenCalledWith({ page: 2 })
+    expect(mockGetCustomers).toHaveBeenCalledWith({ page: 2, industry: 'finance' })
   })
 
   it('getCustomersが失敗した場合、isErrorになること', async () => {
     mockGetCustomers.mockRejectedValueOnce(new Error('failed'))
 
-    const { result } = customRenderHook(() => useGetCustomersQuery(1))
+    const { result } = customRenderHook(() => useGetCustomersQuery({ page: 1 }))
 
     await waitFor(() => expect(result.current.isError).toBe(true))
   })
